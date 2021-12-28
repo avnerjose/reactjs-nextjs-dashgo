@@ -26,4 +26,4 @@ const SignIn: NextPage = () => {
   );
 };
 
-export default Home;
+export default SignIn;
