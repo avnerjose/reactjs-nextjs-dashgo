@@ -24,6 +24,8 @@ import { RiAddLine, RiPencilLine } from "react-icons/ri";
 import { Header } from "../../components/Header";
 import { Pagination } from "../../components/Pagination";
 import { Sidebar } from "../../components/Sidebar";
+import { UserListItem } from "../../components/UserListItem";
+import { UserListItemSkeleton } from "../../components/UserListItem/skeleton";
 import { getUsers, useUsers } from "../../hooks/useUsers";
 import { api } from "../../services/api";
 import { queryClient } from "../../services/queryClient";
@@ -32,7 +34,7 @@ type User = {
   id: string;
   name: string;
   email: string;
-  createdAt: string;
+  created_at: string;
 };
 
 type UserListProps = {
@@ -87,11 +89,7 @@ const UserList: NextPage<UserListProps> = ({ users }) => {
               </Button>
             </NextLink>
           </Flex>
-          {isLoading ? (
-            <Flex justify="center">
-              <Spinner size="md" color="gray.500" ml="4" />
-            </Flex>
-          ) : error ? (
+          {error ? (
             <Flex justify="center">
               <Text>Falha ao obter dados dos usuários.</Text>
             </Flex>
@@ -112,48 +110,37 @@ const UserList: NextPage<UserListProps> = ({ users }) => {
                     <Th width="2"></Th>
                   </Tr>
                 </Thead>
-                <Tbody>
-                  {data?.users.map(({ id, name, email, createdAt }) => (
-                    <Tr key={id}>
-                      <Td px={["2", "4", "6"]}>
-                        <Checkbox colorScheme="pink" />
-                      </Td>
-                      <Td>
-                        <Box>
-                          <Link
-                            color="purple.500"
-                            onMouseEnter={() => handlePrefetchUser(id)}
-                          >
-                            <Text fontWeight="bold">{name}</Text>
-                          </Link>
-                          <Text fontSize="small" color="gray.300">
-                            {email}
-                          </Text>
-                        </Box>
-                      </Td>
-                      {isWideVersion && <Td>{createdAt}</Td>}
-                      <Td p={["0", "3"]}>
-                        <Button
-                          cursor="pointer"
-                          as="a"
-                          size="sm"
-                          colorScheme="purple"
-                          leftIcon={<Icon as={RiPencilLine} />}
-                          variant="ghost"
-                          p={1}
-                        >
-                          Editar
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
+                {isLoading ? (
+                  <Tbody>
+                    {[...new Array(6)].map((_, index) => (
+                      <UserListItemSkeleton
+                        key={index}
+                        isWideVersion={!!isWideVersion}
+                      />
+                    ))}
+                  </Tbody>
+                ) : (
+                  <>
+                    <Tbody>
+                      {data?.users.map((user) => (
+                        <UserListItem
+                          key={user.id}
+                          user={user}
+                          isWideVersion={!!isWideVersion}
+                          handlePrefetchUser={handlePrefetchUser}
+                        />
+                      ))}
+                    </Tbody>
+                  </>
+                )}
               </Table>
-              <Pagination
-                totalRegisters={data?.totalRegisters || 0}
-                currentPage={page}
-                onPageChange={setPage}
-              />
+              {!isLoading && (
+                <Pagination
+                  totalRegisters={data?.totalRegisters || 0}
+                  currentPage={page}
+                  onPageChange={setPage}
+                />
+              )}
             </>
           )}
         </Box>
@@ -164,11 +151,11 @@ const UserList: NextPage<UserListProps> = ({ users }) => {
 
 export default UserList;
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const { users, totalRegisters } = await getUsers(1);
-  return {
-    props: {
-      users,
-    },
-  };
-};
+// export const getServerSideProps: GetServerSideProps = async () => {
+//   const { users, totalRegisters } = await getUsers(1);
+//   return {
+//     props: {
+//       users,
+//     },
+//   };
+// };
