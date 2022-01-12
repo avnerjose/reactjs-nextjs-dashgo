@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Input } from "../components/Form/input";
+import { useAuth } from "../context/AuthContext";
 
 type SignInFormData = {
   email: string;
@@ -17,6 +18,7 @@ const signInFormSchema = yup.object().shape({
 });
 
 const SignIn: NextPage = () => {
+  const { signIn } = useAuth();
   const {
     register,
     handleSubmit,
@@ -25,9 +27,11 @@ const SignIn: NextPage = () => {
     resolver: yupResolver(signInFormSchema),
   });
 
-  const handleSignIn: SubmitHandler<SignInFormData> = async (values) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(values);
+  const handleSignIn: SubmitHandler<SignInFormData> = async ({
+    email,
+    password,
+  }) => {
+    await signIn({ email, password });
   };
 
   return (
